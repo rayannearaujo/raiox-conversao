@@ -28,7 +28,7 @@ export default function RootLayout({
         </noscript>
 
         {/* ===== GOOGLE TAG MANAGER (SCRIPT) ===== */}
-        <Script id="gtm" strategy="afterInteractive">
+       <Script id="gtm" strategy="beforeInteractive">
           {`
             (function(w,d,s,l,i){
               w[l]=w[l]||[];
