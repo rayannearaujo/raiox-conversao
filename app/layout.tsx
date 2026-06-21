@@ -28,7 +28,7 @@ export default function RootLayout({
         </noscript>
 
         {/* ===== GTM (SCRIPT) ===== */}
-       <Script id="gtm" strategy="beforeInteractive">
+       <Script id="gtm" strategy="afterInteractive">
           {`
             (function(w,d,s,l,i){
               w[l]=w[l]||[];
