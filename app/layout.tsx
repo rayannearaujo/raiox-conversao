@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Raio-X de Conversão | Ascenda Web",
@@ -28,6 +29,7 @@ export default function RootLayout({
     </Script>
 
     {children}
+    <Analytics />
   </body>
 </html>
   );
