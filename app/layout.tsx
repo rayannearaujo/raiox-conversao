@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="pt-BR" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
 
-        {/* ===== GOOGLE TAG MANAGER (BODY) ===== */}
+        {/* ===== GTM (BODY) ===== */}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-MJ2Q365N"
@@ -27,7 +27,7 @@ export default function RootLayout({
           />
         </noscript>
 
-        {/* ===== GOOGLE TAG MANAGER (SCRIPT) ===== */}
+        {/* ===== GTM (SCRIPT) ===== */}
        <Script id="gtm" strategy="beforeInteractive">
           {`
             (function(w,d,s,l,i){
