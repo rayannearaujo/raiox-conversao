@@ -50,24 +50,25 @@ export default function ResultadoParcial({
 
     setEnviando(true);
 
-    try {
-      await fetch("/api/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome,
-          email,
-          whatsapp,
-          url: resultado.url,
-          score: resultado.scoreGeral,
-        }),
-      });
-    } catch {
-      // Não bloqueia o usuário mesmo se o envio falhar.
-    } finally {
-      setEnviando(false);
-      onCapturado({ nome, email, whatsapp });
-    }
+try {
+  await fetch("/api/lead", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nome,
+      email,
+      whatsapp,
+      url: resultado.url,
+      score: resultado.scoreGeral,
+      analise: resultado,
+    }),
+  });
+} catch {
+  // Não bloqueia o usuário mesmo se o envio falhar.
+} finally {
+  setEnviando(false);
+  onCapturado({ nome, email, whatsapp });
+}
   }
 
   return (
@@ -118,14 +119,23 @@ export default function ResultadoParcial({
             className={`border rounded-xl px-4 py-3 focus:outline-none transition-colors ${inputClass}`}
           />
 
-          <input
-            type="tel"
-            required
-            placeholder="WhatsApp com DDD"
-            value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            className={`border rounded-xl px-4 py-3 focus:outline-none transition-colors ${inputClass}`}
-          />
+         <div className="relative">
+  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg">🇧🇷</span>
+  <input
+    type="tel"
+    required
+    placeholder="(11) 99999-9999"
+    value={whatsapp}
+    onChange={(e) => {
+      const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+      let masked = digits;
+      if (digits.length > 2) masked = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      if (digits.length > 7) masked = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+      setWhatsapp(masked);
+    }}
+    className={`w-full border rounded-xl pl-10 pr-4 py-3 focus:outline-none transition-colors ${inputClass}`}
+  />
+</div>
 
           {erro && <p className="text-red-400 text-sm">{erro}</p>}
 
@@ -139,8 +149,7 @@ export default function ResultadoParcial({
         </form>
 
         <p className={`text-xs mt-4 text-center ${darkMode ? "text-slate-500" : "text-slate-500"}`}>
-          Sem spam. Usamos seus dados apenas para liberar o diagnóstico e falar sobre melhorias no
-          seu site, se fizer sentido.
+          Usamos seus dados apenas para liberar o diagnóstico e falar sobre melhorias no seu site.
         </p>
       </div>
     </div>

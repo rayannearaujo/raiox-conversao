@@ -11,6 +11,34 @@ export async function POST(req: NextRequest) {
     const whatsapp = (body?.whatsapp || "").toString().trim();
     const url = (body?.url || "").toString().trim();
     const score = body?.score;
+    const analise = body?.analise;
+
+    const linhasAchados = analise?.achados
+  ?.map((a: { ok: boolean; titulo: string; detalhe: string }) =>
+    `${a.ok ? "✅" : "❌"} ${a.titulo}\n   ${a.detalhe}`
+  )
+  .join("\n\n") ?? "";
+
+const emailBody = [
+  `Novo lead capturado pelo Raio-X de Conversão`,
+  ``,
+  `Nome: ${nome || "(não informado)"}`,
+  `E-mail: ${email}`,
+  `WhatsApp: ${whatsapp}`,
+  `Site analisado: ${url}`,
+  `Score geral: ${score ?? "n/d"}`,
+  `Data: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Fortaleza" })}`,
+  ``,
+  `─────────────────────────────`,
+  `RELATÓRIO COMPLETO`,
+  `─────────────────────────────`,
+  `Conversão: ${analise?.scoreConversao ?? "n/d"}`,
+  `Clareza:   ${analise?.scoreClareza ?? "n/d"}`,
+  `Confiança: ${analise?.scoreConfianca ?? "n/d"}`,
+  `Visib.:    ${analise?.scoreVisibilidade ?? "n/d"}`,
+  ``,
+  linhasAchados,
+].join("\n");
 
     if (!email || !email.includes("@") || !whatsapp) {
       return NextResponse.json({ erro: "Dados inválidos." }, { status: 400 });
@@ -31,17 +59,7 @@ export async function POST(req: NextRequest) {
       from: "Raio-X de Conversão <onboarding@resend.dev>",
       to: destinatario,
       subject: `Novo lead no Raio-X: ${url}`,
-      text: [
-        `Novo lead capturado pelo Raio-X de Conversão`,
-        ``,
-        `Nome: ${nome || "(não informado)"}`,
-        `E-mail: ${email}`,
-        `WhatsApp: ${whatsapp}`,
-        `Site analisado: ${url}`,
-        `Score geral: ${score ?? "n/d"}`,
-        ``,
-        `Data: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Fortaleza" })}`,
-      ].join("\n"),
+      text: emailBody,
     });
 
     return NextResponse.json({ ok: true });
