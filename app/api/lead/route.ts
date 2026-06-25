@@ -55,6 +55,13 @@ const emailBody = [
 
     const resend = new Resend(apiKey);
 
+    const emailsTeste = ["ascendaweb@gmail.com"]; // adiciona aqui os emails de teste
+
+if (emailsTeste.includes(email)) {
+  console.log("EMAIL DE TESTE — não enviado ao Resend:", emailBody);
+  return NextResponse.json({ ok: true, aviso: "Email de teste, não enviado." });
+}
+
     await resend.emails.send({
       from: "Raio-X de Conversão <onboarding@resend.dev>",
       to: destinatario,
