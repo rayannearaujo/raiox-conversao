@@ -369,7 +369,7 @@ function detectarSelosConfianca($: cheerio.CheerioAPI, bodyText: string): boolea
   ];
 
   const alts: string[] = [];
-  $("img[alt]").each((_, el) => alts.push($(el).attr("alt")!.toLowerCase()));
+  $("img[alt]").each((_, el) => { alts.push($(el).attr("alt")!.toLowerCase()); });
 
   return palavras.some((p) => bodyText.includes(p) || alts.some((a) => a.includes(p)));
 }
