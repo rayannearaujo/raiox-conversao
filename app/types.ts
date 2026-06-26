@@ -36,11 +36,24 @@ export interface ResultadoAnalise {
 
 export interface ResultadoPerformance {
   disponivel: boolean;
+
+  // Scores gerais
   scoreMobile?: number;
   scoreDesktop?: number;
-  lcp?: string;
-  cls?: string;
-  fcp?: string;
+
+  // Métricas com nome em português
+  lcp?: string;           // "Tempo para carregar o conteúdo principal"
+  fcp?: string;           // "Tempo para aparecer o primeiro conteúdo"
+  cls?: string;           // "Estabilidade visual da página"
+  tbt?: string;           // "Tempo em que a página ficou travada"
+  ttfb?: string;          // "Tempo de resposta do servidor"
+  speedIndex?: string;    // "Velocidade de carregamento visual"
+
+  // Scores desktop (quando disponível)
+  lcpDesktop?: string;
+  fcpDesktop?: string;
+  clsDesktop?: string;
+
   mensagem?: string;
 }
 
