@@ -301,7 +301,7 @@ interface DeteccaoPrivacidade {
 function detectarPrivacidade($: cheerio.CheerioAPI): DeteccaoPrivacidade {
   const textoGeral  = $.text().toLowerCase();
   const linksHref: string[] = [];
-  $("a[href]").each((_, el) => linksHref.push(($(el).attr("href") ?? "").toLowerCase()));
+  $("a[href]").each((_, el) => { linksHref.push(($(el).attr("href") ?? "").toLowerCase()); });
 
   const palavrasPrivacidade = ["privacidade", "privacy", "lgpd", "dados pessoais"];
   const palavrasTermos      = ["termos de uso", "terms of use", "termos e condições", "termos de serviço"];
