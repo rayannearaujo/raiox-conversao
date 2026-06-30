@@ -12,7 +12,7 @@ type Estado = "loading" | "naoEncontrado" | "parcial" | "completo";
 
 export default function ResultadoPage() {
   const params = useParams();
-  const id = params?.id as string;
+const slug = params?.slug as string;
 
   const [estado, setEstado] = useState<Estado>("loading");
   const [darkMode] = useState(true);
@@ -24,7 +24,7 @@ export default function ResultadoPage() {
       const { data, error } = await getSupabase()
         .from("analises")
         .select("*")
-        .eq("id", id)
+        .eq("slug", slug)
         .single();
 
       if (error || !data) {
@@ -68,8 +68,8 @@ export default function ResultadoPage() {
         );
     }
 
-    if (id) buscar();
-  }, [id]);
+    if (slug) buscar();
+}, [slug]);
 
   const pageBg = darkMode ? "bg-[#070b14] text-white" : "bg-[#f7f4ef] text-slate-950";
 

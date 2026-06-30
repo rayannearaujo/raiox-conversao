@@ -84,6 +84,10 @@ export default function ResultadoParcial({
 
   return (
     <div className="w-full max-w-xl mx-auto animate-fade-in-up">
+      <p className={`text-xs mb-4 text-center break-all ${darkMode ? "text-slate-500" : "text-slate-500"}`}>
+        {resultado.url}
+      </p>
+
       <div className="text-center mb-8">
         <ScoreGauge
           score={resultado.scoreGeral}
