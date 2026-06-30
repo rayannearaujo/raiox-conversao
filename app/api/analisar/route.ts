@@ -903,11 +903,12 @@ const { data } = await getSupabase().from('analises').insert({
   pilar_mais_fraco: resultado.pilarMaisFraco,
   oportunidade_principal: resultado.oportunidadePrincipal,
   achados: resultado.achados,
-}).select('id').single();
+}).select('id, slug').single();
 
 const id = data?.id ?? null;
+const slug = data?.slug ?? null;
 
-return NextResponse.json({ ...resultado, id });
+return NextResponse.json({ ...resultado, id, slug });
     } catch (err) {
   console.error('ERRO_BUSCAR_HTML:', err);
   const resultadoErro: ResultadoAnalise = {
