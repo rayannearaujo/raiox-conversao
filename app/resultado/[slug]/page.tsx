@@ -38,6 +38,7 @@ const slug = params?.slug as string;
 
       const resultadoFormatado: ResultadoAnalise = {
         id: data.id,
+        slug: data.slug,
         url: data.url,
         tipoSite: data.tipo_site,
         scoreGeral: data.score_geral,
