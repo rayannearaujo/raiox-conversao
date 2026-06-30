@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
 import type { Achado, Pilar, ResultadoAnalise, TipoSite } from "@/app/types";
+import { supabase } from '@/lib/supabase'
 
 export const runtime = "nodejs";
 
@@ -889,7 +890,24 @@ export async function POST(req: NextRequest) {
       const html     = await buscarHtml(url.toString());
       const analise  = analisarHtml(html, url.toString());
       const resultado: ResultadoAnalise = { url: url.toString(), ...analise };
-      return NextResponse.json(resultado);
+
+// Salva no Supabase
+const { data } = await supabase.from('analises').insert({
+  url: resultado.url,
+  tipo_site: resultado.tipoSite,
+  score_geral: resultado.scoreGeral,
+  score_conversao: resultado.scoreConversao,
+  score_clareza: resultado.scoreClareza,
+  score_confianca: resultado.scoreConfianca,
+  score_visibilidade: resultado.scoreVisibilidade,
+  pilar_mais_fraco: resultado.pilarMaisFraco,
+  oportunidade_principal: resultado.oportunidadePrincipal,
+  achados: resultado.achados,
+}).select('id').single();
+
+const id = data?.id ?? null;
+
+return NextResponse.json({ ...resultado, id });
     } catch {
       const resultadoErro: ResultadoAnalise = {
         url: url.toString(),
