@@ -65,13 +65,14 @@ export default function ResultadoParcial({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nome,
-          email,
-          whatsapp: `${paisSelecionado.ddi} ${whatsapp}`,
-          url: resultado.url,
-          score: resultado.scoreGeral,
-          analise: resultado,
-        }),
+  nome,
+  email,
+  whatsapp: `${paisSelecionado.ddi} ${whatsapp}`,
+  url: resultado.url,
+  score: resultado.scoreGeral,
+  analise: resultado,
+  analiseId: resultado.id,
+}),
       });
     } catch {
       // Não bloqueia o usuário mesmo se o envio falhar.
