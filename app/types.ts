@@ -20,8 +20,9 @@ export interface ResultadoAnalise {
   id?: string;
   slug?: string;
   url: string;
-
+  tipoSite: TipoSite;
   scoreGeral: number;
+  
   scoreConversao: number;
   scoreClareza: number;
   scoreConfianca: number;
