@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as cheerio from "cheerio";
 import type { Achado, Pilar, ResultadoAnalise, TipoSite } from "@/app/types";
-import { supabase } from '@/lib/supabase'
+import { getSupabase } from '@/lib/supabase'
 
 export const runtime = "nodejs";
 
@@ -892,7 +892,7 @@ export async function POST(req: NextRequest) {
       const resultado: ResultadoAnalise = { url: url.toString(), ...analise };
 
 // Salva no Supabase
-const { data } = await supabase.from('analises').insert({
+const { data } = await getSupabase().from('analises').insert({
   url: resultado.url,
   tipo_site: resultado.tipoSite,
   score_geral: resultado.scoreGeral,
