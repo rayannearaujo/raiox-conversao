@@ -908,8 +908,9 @@ const { data } = await getSupabase().from('analises').insert({
 const id = data?.id ?? null;
 
 return NextResponse.json({ ...resultado, id });
-    } catch {
-      const resultadoErro: ResultadoAnalise = {
+    } catch (err) {
+  console.error('ERRO_BUSCAR_HTML:', err);
+  const resultadoErro: ResultadoAnalise = {
         url: url.toString(),
         tipoSite: "desconhecido",
         scoreGeral: 0,
