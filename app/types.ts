@@ -17,6 +17,7 @@ export interface Achado {
 }
 
 export interface ResultadoAnalise {
+  id?: string;
   url: string;
   tipoSite: TipoSite;
 
