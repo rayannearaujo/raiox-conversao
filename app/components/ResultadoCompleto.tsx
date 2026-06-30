@@ -382,6 +382,47 @@ export default function ResultadoCompleto({
         <BlocoPilar titulo="Visibilidade"      score={resultado.scoreVisibilidade} achados={achadosVisibilidade} darkMode={darkMode} />
       </section>
 
+{/* CTA Plano de Ação PDF */}
+<section
+  className={`border rounded-3xl p-9 text-center mb-8 ${
+    darkMode
+      ? "bg-gradient-to-br from-emerald-400/20 via-slate-900 to-slate-950 border-emerald-400/40"
+      : "bg-gradient-to-br from-emerald-50 via-white to-slate-50 border-emerald-200 shadow-xl"
+  }`}
+>
+  <p className="text-xs uppercase tracking-[0.25em] text-amber-500 font-semibold mb-3">
+    Resolva você mesmo
+  </p>
+  <h2 className={`text-3xl font-bold mb-4 ${titleClass}`}>
+    Receba o passo a passo completo para corrigir cada problema.
+  </h2>
+  <p className={`mb-7 max-w-2xl mx-auto ${darkMode ? "text-slate-300" : "text-slate-600"}`}>
+    Um PDF com a solução exata para cada ponto identificado nessa análise — pronto para você
+    ou seu desenvolvedor implementar, sem precisar adivinhar por onde começar.
+  </p>
+  <button
+    onClick={async () => {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug: resultado.slug }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    }}
+    className="relative inline-flex items-center gap-3 px-8 py-4 text-lg font-semibold text-slate-950 rounded-xl overflow-hidden transition-all duration-500 hover:scale-[1.02] active:scale-[0.98]"
+    style={{
+      background: "linear-gradient(135deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%)",
+      boxShadow: "0 4px 24px rgba(245, 158, 11, 0.35)",
+    }}
+  >
+    Quero o passo a passo — R$29,90
+    <span>→</span>
+  </button>
+  <p className={`text-xs mt-4 ${softTextClass}`}>Acesso imediato após o pagamento</p>
+</section>
+
+
       {/* CTA final */}
       <section
         className={`border rounded-3xl p-9 text-center ${
