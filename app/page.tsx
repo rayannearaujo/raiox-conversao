@@ -39,10 +39,10 @@ export default function Home() {
       setEstado("parcial");
 
       fetch("/api/performance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: data.url }),
-      })
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ url: data.url, slug: data.slug }),
+})
         .then((r) => r.json())
         .then((perf: ResultadoPerformance) => setPerformance(perf))
         .catch(() =>
