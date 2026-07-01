@@ -43,10 +43,45 @@ function getNivel(score: number): string {
   return "Saudável";
 }
 
-function wrapText(doc: jsPDF, text: string, x: number, y: number, maxWidth: number, lineHeight: number): number {
-  const lines = doc.splitTextToSize(text, maxWidth);
-  doc.text(lines, x, y);
-  return y + lines.length * lineHeight;
+function corScore(score: number): [number, number, number] {
+  if (score >= 90) return [22, 163, 74];
+  if (score >= 50) return [217, 119, 6];
+  return [220, 38, 38];
+}
+
+function newPage(doc: jsPDF): number {
+  doc.addPage();
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, 210, 297, "F");
+  return 20;
+}
+
+function checkPage(doc: jsPDF, y: number, needed: number): number {
+  if (y + needed > 272) return newPage(doc);
+  return y;
+}
+
+function renderCard(doc: jsPDF, y: number, titulo: string, solucao: string, margin: number, contentW: number): number {
+  const solucaoLines = doc.splitTextToSize(solucao, contentW - 10);
+  const boxH = 9 + solucaoLines.length * 5 + 8;
+
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(margin, y, contentW, boxH, 3, 3, "FD");
+  doc.setFillColor(217, 119, 6);
+  doc.rect(margin, y, 3, boxH, "F");
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 23, 42);
+  doc.text(titulo, margin + 8, y + 7);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(71, 85, 105);
+  doc.text(solucaoLines, margin + 8, y + 13);
+
+  return y + boxH + 5;
 }
 
 export async function POST(req: NextRequest) {
@@ -77,7 +112,6 @@ export async function POST(req: NextRequest) {
       : analise.achados ?? [];
 
     const problemas = achados.filter((a: any) => !a.ok);
-
     const doc = new jsPDF({ unit: "mm", format: "a4" });
     const W = 210;
     const margin = 20;
@@ -98,152 +132,234 @@ export async function POST(req: NextRequest) {
       visibilidade: analise.score_visibilidade,
     };
 
-    function checkPage(needed: number) {
-      if (y + needed > 270) {
-        doc.addPage();
-        y = 20;
-      }
-    }
-
-    // Fundo escuro
-    doc.setFillColor(11, 17, 32);
+    // Fundo branco página 1
+    doc.setFillColor(255, 255, 255);
     doc.rect(0, 0, 210, 297, "F");
 
-    // Cabeçalho
-    doc.setFillColor(30, 41, 59);
-    doc.rect(0, 0, 210, 50, "F");
+    // Cabeçalho escuro
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, 210, 45, "F");
 
     doc.setFontSize(22);
-    doc.setTextColor(241, 245, 249);
+    doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.text("Plano de Ação", margin, 22);
+    doc.text("Plano de Ação", margin, 20);
 
     doc.setFontSize(10);
-    doc.setTextColor(251, 191, 36);
+    doc.setTextColor(180, 150, 80);
     doc.setFont("helvetica", "normal");
-    doc.text("Ascenda Web · Raio-X de Conversão", margin, 30);
+    doc.text("Ascenda Web · Raio-X de Conversão", margin, 29);
 
     doc.setFontSize(9);
-    doc.setTextColor(100, 116, 139);
-    doc.text(analise.url, margin, 38);
+    doc.setTextColor(148, 163, 184);
+    doc.text(analise.url, margin, 37);
+    const dataStr = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+    doc.text(dataStr, W - margin - doc.getTextWidth(dataStr), 37);
 
-    const data = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
-    doc.text(data, margin, 45);
-
-    y = 62;
+    y = 58;
 
     // Introdução
-    doc.setFontSize(10);
-    doc.setTextColor(148, 163, 184);
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
     doc.setFont("helvetica", "normal");
-    y = wrapText(doc, "Este relatório foi gerado a partir da análise do seu site pela ferramenta Raio-X de Conversão. Para cada problema identificado, você encontrará uma solução prática. Priorize os itens do pilar com menor score primeiro.", margin, y, contentW, 5);
-    y += 8;
+    const introLines = doc.splitTextToSize("Este relatório foi gerado a partir da análise do seu site pela ferramenta Raio-X de Conversão da Ascenda Web. Para cada problema identificado, você encontrará uma solução prática e direta. Priorize os itens do pilar com menor score primeiro.", contentW);
+    doc.text(introLines, margin, y);
+    y += introLines.length * 5 + 10;
 
     // Score geral
-    checkPage(30);
-    doc.setFillColor(30, 41, 59);
-    doc.roundedRect(margin, y, contentW, 24, 4, 4, "F");
-    doc.setFontSize(11);
-    doc.setTextColor(100, 116, 139);
+    y = checkPage(doc, y, 24);
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(226, 232, 240);
+    doc.roundedRect(margin, y, contentW, 22, 3, 3, "FD");
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+    doc.setFont("helvetica", "normal");
     doc.text("Score Geral do Site", margin + 6, y + 8);
-    doc.setFontSize(20);
+    doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(248, 113, 113);
-    if (analise.score_geral >= 90) doc.setTextColor(52, 211, 153);
-    else if (analise.score_geral >= 50) doc.setTextColor(251, 191, 36);
-    doc.text(`${analise.score_geral}/100 · ${getNivel(analise.score_geral)}`, margin + 6, y + 18);
-    y += 30;
+    const [r, g, b] = corScore(analise.score_geral);
+    doc.setTextColor(r, g, b);
+    doc.text(`${analise.score_geral}/100 · ${getNivel(analise.score_geral)}`, margin + 6, y + 17);
+    y += 28;
 
     // Scores por pilar
-    checkPage(60);
+    y = checkPage(doc, y, 16);
     doc.setFontSize(13);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(241, 245, 249);
+    doc.setTextColor(15, 23, 42);
     doc.text("Visão geral por pilar", margin, y);
     y += 8;
 
-    for (const pilar of ["conversao", "clareza", "confianca", "visibilidade"]) {
+    const todosPilares = ["conversao", "clareza", "confianca", "visibilidade"];
+
+    for (const pilar of todosPilares) {
+      y = checkPage(doc, y, 14);
       const score = scores[pilar];
+      const [pr, pg, pb] = corScore(score);
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(203, 213, 225);
+      doc.setTextColor(51, 65, 85);
       doc.text(pilarLabel[pilar], margin, y);
       doc.setFont("helvetica", "bold");
-      if (score >= 90) doc.setTextColor(52, 211, 153);
-      else if (score >= 50) doc.setTextColor(251, 191, 36);
-      else doc.setTextColor(248, 113, 113);
-      doc.text(`${score}/100 · ${getNivel(score)}`, W - margin - 40, y);
-
+      doc.setTextColor(pr, pg, pb);
+      const scoreText = `${score}/100 · ${getNivel(score)}`;
+      doc.text(scoreText, W - margin - doc.getTextWidth(scoreText), y);
       y += 4;
-      doc.setFillColor(15, 23, 42);
+      doc.setFillColor(226, 232, 240);
       doc.roundedRect(margin, y, contentW, 4, 2, 2, "F");
-      const barW = (score / 100) * contentW;
-      if (score >= 90) doc.setFillColor(52, 211, 153);
-      else if (score >= 50) doc.setFillColor(251, 191, 36);
-      else doc.setFillColor(248, 113, 113);
-      doc.roundedRect(margin, y, barW, 4, 2, 2, "F");
+      doc.setFillColor(pr, pg, pb);
+      doc.roundedRect(margin, y, (score / 100) * contentW, 4, 2, 2, "F");
       y += 10;
+    }
+
+    // Velocidade
+    if (analise.score_performance) {
+      y = checkPage(doc, y, 14);
+      const [vr, vg, vb] = corScore(analise.score_performance);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(51, 65, 85);
+      doc.text("Velocidade", margin, y);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(vr, vg, vb);
+      const vText = `${analise.score_performance}/100 · ${getNivel(analise.score_performance)}`;
+      doc.text(vText, W - margin - doc.getTextWidth(vText), y);
+      y += 4;
+      doc.setFillColor(226, 232, 240);
+      doc.roundedRect(margin, y, contentW, 4, 2, 2, "F");
+      doc.setFillColor(vr, vg, vb);
+      doc.roundedRect(margin, y, (analise.score_performance / 100) * contentW, 4, 2, 2, "F");
+      y += 14;
     }
 
     y += 6;
 
-    // Problemas por pilar
+    // O que corrigir
+    y = checkPage(doc, y, 16);
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(241, 245, 249);
-    checkPage(16);
+    doc.setTextColor(15, 23, 42);
     doc.text("O que corrigir e como fazer", margin, y);
     y += 10;
 
-    for (const pilar of ["conversao", "clareza", "confianca", "visibilidade"]) {
+    for (const pilar of todosPilares) {
       const itens = problemas.filter((a: any) => a.pilar === pilar);
       if (itens.length === 0) continue;
 
-      checkPage(16);
+      // Garante que título do pilar e pelo menos um card ficam juntos
+      const primeiroSolucao = SOLUCOES[itens[0].titulo] || itens[0].detalhe;
+      const primeiroLines = doc.splitTextToSize(primeiroSolucao, contentW - 10);
+      const primeiroH = 9 + primeiroLines.length * 5 + 8;
+      y = checkPage(doc, y, 20 + primeiroH);
+
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(251, 191, 36);
+      doc.setTextColor(15, 23, 42);
       doc.text(pilarLabel[pilar], margin, y);
+      y += 2;
+      doc.setDrawColor(217, 119, 6);
+      doc.setLineWidth(0.5);
+      doc.line(margin, y, margin + contentW, y);
       y += 8;
 
       for (const item of itens) {
         const solucao = SOLUCOES[item.titulo] || item.detalhe;
-        const solucaoLines = doc.splitTextToSize(solucao, contentW - 8);
-        const boxH = 8 + solucaoLines.length * 5 + 10;
-
-        checkPage(boxH);
-        doc.setFillColor(30, 41, 59);
-        doc.roundedRect(margin, y, contentW, boxH, 4, 4, "F");
-        doc.setFillColor(251, 191, 36);
-        doc.rect(margin, y, 3, boxH, "F");
-
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(241, 245, 249);
-        doc.text(item.titulo, margin + 8, y + 7);
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        doc.setTextColor(148, 163, 184);
-        doc.text(solucaoLines, margin + 8, y + 13);
-
-        y += boxH + 5;
+        const solucaoLines = doc.splitTextToSize(solucao, contentW - 10);
+        const boxH = 9 + solucaoLines.length * 5 + 8;
+        y = checkPage(doc, y, boxH);
+        y = renderCard(doc, y, item.titulo, solucao, margin, contentW);
       }
 
       y += 4;
     }
 
+    // Velocidade — problemas e soluções
+    if (analise.score_performance !== null) {
+      const problemasVelocidade: { titulo: string; solucao: string }[] = [];
+
+      if (analise.lcp) {
+        const lcpMs = parseFloat(analise.lcp);
+        if (lcpMs > 2.5 || analise.lcp.includes("s") && parseFloat(analise.lcp) > 2.5) {
+          problemasVelocidade.push({
+            titulo: `LCP: ${analise.lcp} — Conteúdo principal demorando para aparecer`,
+            solucao: "O conteúdo principal da sua página está demorando para aparecer. Isso afasta visitantes e prejudica o posicionamento no Google. Comprima todas as imagens do site e converta para o formato WebP — imagens devem ter no máximo 200KB. Se o seu site usa um construtor, procure pela opção de otimização de imagens nas configurações. Ative também o cache da sua hospedagem ou instale o Cloudflare gratuitamente em cloudflare.com.",
+          });
+        }
+      }
+
+      if (analise.fcp) {
+        problemasVelocidade.push({
+          titulo: `FCP: ${analise.fcp} — Primeiro conteúdo demorando para aparecer`,
+          solucao: "O primeiro elemento da sua página está demorando para aparecer na tela. Remova scripts e plugins desnecessários do seu site — cada ferramenta extra aumenta esse tempo. Ative o cache pelo painel da sua hospedagem e instale o Cloudflare em cloudflare.com para distribuir o conteúdo mais rápido.",
+        });
+      }
+
+      if (analise.ttfb) {
+        const ttfbMs = parseInt(analise.ttfb);
+        if (ttfbMs > 800) {
+          problemasVelocidade.push({
+            titulo: `TTFB: ${analise.ttfb} — Servidor demorando para responder`,
+            solucao: "Seu servidor está demorando para responder antes mesmo de qualquer conteúdo aparecer. Primeiro, ative o cache pelo painel da sua hospedagem — procure por 'cache' ou 'LiteSpeed Cache'. Em seguida, instale o Cloudflare gratuitamente em cloudflare.com. Se mesmo assim o problema persistir, considere trocar para uma hospedagem com suporte a LiteSpeed ou servidores no Brasil.",
+          });
+        }
+      }
+
+      if (analise.tbt) {
+        const tbtMs = parseInt(analise.tbt);
+        if (tbtMs > 200) {
+          problemasVelocidade.push({
+            titulo: `TBT: ${analise.tbt} — Página travando durante o carregamento`,
+            solucao: "Sua página está travando por um período durante o carregamento, impedindo o visitante de interagir. Isso é causado por scripts pesados rodando em segundo plano. Remova plugins e ferramentas que você não usa mais. Se usar Google Tag Manager, verifique se não há tags antigas ou duplicadas. Cada ferramenta de rastreamento ou chat online que você adiciona contribui para esse problema.",
+          });
+        }
+      }
+
+      if (analise.cls) {
+        const clsVal = parseFloat(analise.cls);
+        if (clsVal > 0.1) {
+          problemasVelocidade.push({
+            titulo: `CLS: ${analise.cls} — Elementos se movendo durante o carregamento`,
+            solucao: "Elementos da sua página estão se movendo enquanto carregam — botões, textos e imagens mudam de posição, fazendo o visitante clicar na coisa errada. Defina sempre o tamanho das imagens no seu construtor de site antes de publicar. Evite banners ou elementos que aparecem depois que a página já carregou, como popups que empurram o conteúdo.",
+          });
+        }
+      }
+
+      if (problemasVelocidade.length > 0) {
+        const primeiroVH = 9 + doc.splitTextToSize(problemasVelocidade[0].solucao, contentW - 10).length * 5 + 8;
+        y = checkPage(doc, y, 20 + primeiroVH);
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(15, 23, 42);
+        doc.text("Velocidade", margin, y);
+        y += 2;
+        doc.setDrawColor(217, 119, 6);
+        doc.setLineWidth(0.5);
+        doc.line(margin, y, margin + contentW, y);
+        y += 8;
+
+        for (const pv of problemasVelocidade) {
+          const pvLines = doc.splitTextToSize(pv.solucao, contentW - 10);
+          const pvH = 9 + pvLines.length * 5 + 8;
+          y = checkPage(doc, y, pvH);
+          y = renderCard(doc, y, pv.titulo, pv.solucao, margin, contentW);
+        }
+
+        y += 4;
+      }
+    }
+
     // Rodapé
-    checkPage(20);
-    doc.setFillColor(30, 41, 59);
-    doc.rect(0, y, 210, 25, "F");
+    y = checkPage(doc, y, 22);
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, y, 210, 22, "F");
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(148, 163, 184);
+    doc.setTextColor(203, 213, 225);
     doc.text("Precisa de ajuda para implementar essas melhorias?", margin, y + 8);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(251, 191, 36);
-    doc.text("Fale com a Ascenda Web · ascendaweb.com.br", margin, y + 15);
+    doc.setTextColor(255, 255, 255);
+    doc.text("Fale com a Ascenda Web · hello@ascendaweb.com", margin, y + 16);
 
     const pdfBytes = doc.output("arraybuffer");
 
