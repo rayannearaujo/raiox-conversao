@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: email || undefined,
-      success_url: `${baseUrl}/resultado/${slug}?pago=true`,
+      success_url: `${baseUrl}/obrigado?slug=${slug}`,
       cancel_url: `${baseUrl}/resultado/${slug}`,
       metadata: { slug },
     });
